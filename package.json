@@ -1,0 +1,22 @@
+{
+  "name": "tago-script",
+  "version": "1.0.0",
+  "description": "Analysis Scripts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "script",
+    "tago"
+  ],
+  "author": "Tago LLC",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.0.0-rc.6",
+    "lodash": "^4.13.1",
+    "moment": "^2.13.0",
+    "moment-timezone": "^0.5.4",
+    "tago": "^2.0.5"
+  }
+}
