@@ -5,6 +5,11 @@
  * we will ignore analysis token.
  */
 'use strict';
+
+//Use on staging
+process.env.TAGO_API = "https://api-staging.tago.io";
+process.env.TAGO_REALTIME = "wss://api-staging.tago.io:86";
+
 const Analysis  = require('tago/analysis');
 const Device    = require('tago/device');
 const Utils     = require('tago/utils');
@@ -246,7 +251,7 @@ function myanalysis(context) {
     }
 }
 
-module.exports = new Analysis(myanalysis, '14f3a540-3e4b-11e6-a9e9-c38b3d7df0db');
+module.exports = new Analysis(myanalysis, 'c3db4a50-4e44-11e6-bf5f-358c3225265e');
 
 
 
