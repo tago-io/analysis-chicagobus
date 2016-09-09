@@ -6,148 +6,75 @@
  */
 'use strict';
 
-//Use on staging
-process.env.TAGO_API = "https://api-staging.tago.io";
-process.env.TAGO_REALTIME = "wss://api-staging.tago.io:86";
-
 const Analysis  = require('tago/analysis');
 const Device    = require('tago/device');
-const Utils     = require('tago/utils');
 const _         = require('lodash');
 const moment_tz = require('moment-timezone');
 const async     = require('async');
 
-const TASK_INTERVAL = 2; // minute
+const TASK_INTERVAL   = 2; // minute
 const ALL_ROUTE_MILES = 3.2; // miles
 const LOCATIONS = [
     {
         "id": 1,
-        "location": {
-            "lat": Number(`41.87${_.random(7000, 9000)}`),
-            lng: -87.624205
-        },
+        "location": { "lat": 41.876919, "lng": Number(`-87.6${_.random(27660, 34800)}`) },
         "max_speed": 45
     }, {
         "id": 2,
-        "location": {
-            "lat": Number(`41.88${_.random(1000, 4000)}`),
-            lng: -87.624205
-        },
-        "max_speed": 0
+        "location": { "lat": 41.876851, "lng": -87.635176 },
+        "max_speed": 5
     }, {
         "id": 3,
-        "location": {
-            "lat": Number(`41.88${_.random(4000, 8000)}`),
-            lng: -87.624448
-        },
+        "location": { "lat": Number(`41.87${_.random(6955, 8955)}`), "lng": -87.635176 },
         "max_speed": 20
     }, {
         "id": 4,
-        "location": {
-            "lat": 41.888330,
-            "lng": -87.624792
-        },
-        "max_speed": 3
+        "location": { "lat": Number(`41.87${_.random(8955, 9999)}`), "lng": -87.635176 },
+        "max_speed": 20
     }, {
         "id": 5,
-        "location": {
-            "lat": 41.888286,
-            "lng": -87.625221
-        },
-        "max_speed": 10
+        "location": { "lat": Number(`41.88${_.random(0, 5500)}`), "lng": -87.635376 },
+        "max_speed": 20
     }, {
         "id": 6,
-        "location": {
-            "lat": 41.887392,
-            "lng": -87.626122
-        },
-        "max_speed": 8
+        "location": { "lat": 41.885714, "lng": -87.635363 },
+        "max_speed": 30
     }, {
         "id": 7,
-        "location": {
-            "lat": 41.886912,
-            lng: Number(`-87.6${_.random(28000, 35000)}`)
-        },
-        "max_speed": 23
+        "location": { "lat": 41.885714, "lng": Number(`-87.63${_.random(1999, 5363)}`) },
+        "max_speed": 15
     }, {
         "id": 8,
-        "location": {
-            "lat": 41.886437,
-            "lng": -87.636303
-        },
-        "max_speed": 25
+        "location": { "lat": 41.885714, "lng": Number(`-87.62${_.random(7999, 9999)}`) },
+        "max_speed": 20
     }, {
         "id": 9,
-        "location": {
-            "lat": 41.885710,
-            "lng": -87.636969
-        },
-        "max_speed": 3
+        "location": { "lat": 41.885610, "lng": -87.627956 },
+        "max_speed": 5
     }, {
         "id": 10,
-        "location": {
-            "lat": Number(`41.88${_.random(0, 5224)}`),
-            lng: -87.637054
-        },
-        "max_speed": 40
+        "location": { "lat": Number(`41.88${_.random(0, 5610)}`), "lng": -87.627956 },
+        "max_speed": 20
     }, {
         "id": 11,
-        "location": {
-            "lat": Number(`41.87${_.random(8000, 9999)}`),
-            lng: -87.637054
-        },
-        "max_speed": 40
-    }, {
-        "id": 12,
-        "location": {
-            "lat": 41.876816,
-            "lng": -87.636808
-        },
-        "max_speed": 15
-    }, {
-        "id": 13,
-        "location": {
-            "lat": 41.876808,
-            lng: Number(`-87.63${_.random(4000, 5871)}`)
-        },
-        "max_speed": 15
-    }, {
-        "id": 14,
-        "location": {
-            "lat": Number(`41.87${_.random(5570, 6815)}`),
-            lng: -87.633713
-        },
-        "max_speed": 15
-    }, {
-        "id": 15,
-        "location": {
-            "lat": 41.875501,
-            "lng": -87.633624
-        },
-        "max_speed": 15
-    }, {
-        "id": 16,
-        "location": {
-            "lat": 41.875569,
-            lng: Number(`-87.63${_.random(0, 3271)}`)
-        },
-        "max_speed": 50
-    }, {
-        "id": 17,
-        "location": {
-            "lat": 41.875697,
-            lng: Number(`-87.62${_.random(4200, 8997)}`)
-        },
-        "max_speed": 13
+        "location": { "lat": Number(`41.87${_.random(6999, 9999)}`), "lng": -87.627720 },
+        "max_speed": 20
     }
 ];
 
+function env_to_obj(environment) {
+    return environment.reduce((pv,cv) => { 
+        pv[cv.key] = cv.value;
+        return pv; 
+    }, {});
+}
+
 function myanalysis(context) {
-    let environment = Utils.env_to_obj(context.environment);
+    let environment  = env_to_obj(context.environment);
     const bus_device = new Device(environment.bus_token);
 
     function get_serie(cb) {
-        bus_device.find({ "variable": "serie", "query": "last_value" }).then((result) => {
+        bus_device.find({"variable":"serie", "query":"last_value"}).then((result) => {
             result = result[0] || {};
             let serie = 0;
 
@@ -162,7 +89,7 @@ function myanalysis(context) {
     }
 
     function get_inc_id(cb) {
-        bus_device.find({ "variable": "id", "query": "last_value" }).then((result) => {
+        bus_device.find({"variable":"id", "query": "last_value"}).then((result) => {
             result = result[0] || {};
             let id = 0;
 
@@ -177,8 +104,9 @@ function myanalysis(context) {
             cb(null, id);
         }).catch(console.log);
     }
+    
     function get_fuel(cb) {
-        bus_device.find({ "variable": "fuel_level", "query": "last_value" }).then((result) => {
+        bus_device.find({"variable":"fuel_level", "query": "last_value"}).then((result) => {
             result = result[0] || {};
             let fuel = 100;
 
@@ -195,7 +123,7 @@ function myanalysis(context) {
         let start_date = new moment_tz().tz("America/Chicago").startOf('day')._d;
         let end_date   = new moment_tz().tz("America/Chicago").endOf('day')._d;
 
-        bus_device.find({ "variable": "stops_fuel_station", "query": "last_value", "qty": 1, "start_date": start_date, "end_date": end_date }).then((result) => {
+        bus_device.find({"variable":"stops_fuel_station", "query": "last_value", "qty": 1, "start_date":start_date, "end_date": end_date}).then((result) => {
             result = result[0] || {};
             let stops = result.value || 0;
 
@@ -204,7 +132,7 @@ function myanalysis(context) {
     }
 
     function get_trip_odometer(cb) {
-        bus_device.find({ "variable": "trip_odometer", "query": "last_value" }).then((result) => {
+        bus_device.find({"variable":"trip_odometer", "query": "last_value"}).then((result) => {
             result = result[0] || {};
             let miles = 0;
 
@@ -224,7 +152,7 @@ function myanalysis(context) {
         }
 
         let insert = function (vari, object_vari) {
-            bus_device.insert(Object.assign({}, { "variable": vari }, object_vari));
+            bus_device.insert(Object.assign({}, {"variable":vari}, object_vari));
         };
 
         // Bus Prop
@@ -251,7 +179,7 @@ function myanalysis(context) {
     }
 }
 
-module.exports = new Analysis(myanalysis, 'c3db4a50-4e44-11e6-bf5f-358c3225265e');
+module.exports = new Analysis(myanalysis, '14f3a540-3e4b-11e6-a9e9-c38b3d7df0db');
 
 
 
