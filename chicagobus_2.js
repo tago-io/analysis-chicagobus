@@ -72,6 +72,7 @@ function env_to_obj(environment) {
 function myanalysis(context) {
     let environment  = env_to_obj(context.environment);
     const bus_device = new Device(environment.bus_token);
+    context.log(`Running at ${moment_tz().format()}`);
 
     function get_serie(cb) {
         bus_device.find({"variable":"serie", "query":"last_value"}).then((result) => {
@@ -85,7 +86,7 @@ function myanalysis(context) {
             serie += 1;
 
             cb(null, serie);
-        }).catch(console.log);
+        }).catch(context.log);
     }
 
     function get_inc_id(cb) {
@@ -102,7 +103,7 @@ function myanalysis(context) {
             id += 1;
 
             cb(null, id);
-        }).catch(console.log);
+        }).catch(context.log);
     }
     
     function get_fuel(cb) {
@@ -116,7 +117,7 @@ function myanalysis(context) {
             }
 
             cb(null, fuel);
-        }).catch(console.log);
+        }).catch(context.log);
     }
 
     function stops_fuel_station(cb) {
@@ -128,7 +129,7 @@ function myanalysis(context) {
             let stops = result.value || 0;
 
             cb(null, stops);
-        }).catch(console.log);
+        }).catch(context.log);
     }
 
     function get_trip_odometer(cb) {
@@ -142,13 +143,13 @@ function myanalysis(context) {
             }
 
             cb(null, miles);
-        }).catch(console.log);
+        }).catch(context.log);
     }
 
     let functions = { "serie": get_serie, "id": get_inc_id, "fuel": get_fuel, "stops_fuel_station": stops_fuel_station, "trip_odometer": get_trip_odometer };
     async.parallel(functions, function (err, result) {
         if (err) {
-            return console.log(err);
+            return context.log(err);
         }
 
         let insert = function (vari, object_vari) {
